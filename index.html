@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bon Ghrabawy | بن غراباوي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #FDFBF7; }
+        .coffee-bg { background-color: #4A3B32; }
+        .coffee-text { color: #4A3B32; }
+        .card-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- الهيدر -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-black coffee-text">☕ بن غراباوي</h1>
+            <button onclick="openAdmin()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold text-sm transition">
+                ⚙️ لوحة التحكم
+            </button>
+        </div>
+    </header>
+
+    <!-- واجهة المتجر -->
+    <main class="max-w-7xl mx-auto px-4 py-10">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-black mb-4 coffee-text">أهلاً بيك في بن غراباوي</h2>
+            <p class="text-gray-500 text-lg">أجود أنواع البن، محمص ومطحون على مزاجك.</p>
+        </div>
+
+        <!-- شبكة المنتجات -->
+        <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- المنتجات هتظهر هنا أوتوماتيك -->
+        </div>
+    </main>
+
+    <!-- صفحة الأدمن (مخفية) -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold coffee-text">إضافة منتج جديد</h3>
+                <button onclick="closeAdmin()" class="text-gray-400 hover:text-red-500 text-2xl">&times;</button>
+            </div>
+            
+            <form id="product-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">اسم المنتج</label>
+                    <input type="text" id="p-name" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-coffee-text">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">السعر (ج.م)</label>
+                    <input type="number" id="p-price" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-coffee-text">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">رابط الصورة (URL)</label>
+                    <input type="url" id="p-image" placeholder="https://..." required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-coffee-text">
+                </div>
+                <button type="submit" class="w-full bg-[#4A3B32] text-white font-bold py-3 rounded-lg hover:bg-[#3b2e26] transition">
+                    إضافة المنتج للمتجر
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- السكريبت (الدماغ بتاعة الموقع) -->
+    <script>
+        // منتجات افتراضية تظهر أول مرة
+        const defaultProducts = [
+            {
+                id: 1,
+                name: "قهوة تركي - محمصة غامق",
+                price: 150,
+                image: "https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&q=80&w=500"
+            },
+            {
+                id: 2,
+                name: "بن كولومبي فاتح",
+                price: 250,
+                image: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&q=80&w=500"
+            }
+        ];
+
+        // تحميل المنتجات من ذاكرة المتصفح
+        let products = JSON.parse(localStorage.getItem('bonProducts')) || defaultProducts;
+
+        // دالة عرض المنتجات
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
+            
+            products.forEach(product => {
+                grid.innerHTML += `
+                    <div class="bg-white rounded-2xl p-4 card-shadow hover:-translate-y-1 transition duration-300">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-64 object-cover rounded-xl mb-4">
+                        <h3 class="text-xl font-bold coffee-text mb-2">${product.name}</h3>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-2xl font-black text-green-700">${product.price} <span class="text-sm">ج.م</span></span>
+                            <button class="bg-[#4A3B32] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#3b2e26] transition">
+                                أضف للسلة
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // تشغيل العرض أول ما الصفحة تفتح
+        renderProducts();
+
+        // دوال لوحة التحكم
+        function openAdmin() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            document.getElementById('admin-modal').classList.add('flex');
+        }
+
+        function closeAdmin() {
+            document.getElementById('admin-modal').classList.add('hidden');
+            document.getElementById('admin-modal').classList.remove('flex');
+        }
+
+        // إضافة منتج جديد
+        document.getElementById('product-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newProduct = {
+                id: Date.now(),
+                name: document.getElementById('p-name').value,
+                price: document.getElementById('p-price').value,
+                image: document.getElementById('p-image').value
+            };
+
+            products.push(newProduct);
+            
+            // حفظ في ذاكرة المتصفح
+            localStorage.setItem('bonProducts', JSON.stringify(products));
+            
+            // تحديث الشاشة
+            renderProducts();
+            closeAdmin();
+            this.reset();
+            
+            alert('تم إضافة المنتج بنجاح! ☕');
+        });
+    </script>
+</body>
+</html>
